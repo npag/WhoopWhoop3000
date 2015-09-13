@@ -125,10 +125,6 @@ namespace Soundboard
                 waveOut.Init(audioFileReader);
                 waveOut.Play();
 
-                //MMDevice device2 = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).FirstOrDefault(d => d.ID == "{0.0.0.00000000}.{32867401-43a5-4319-98e3-c8f88b9b8f5f}");
-
-                //	ID	"{0.0.0.00000000}.{234779d1-4c87-4bc3-88c9-e03ea41dfbd0}"	string
-
                 waveOut2 = new WasapiOut(device2, AudioClientShareMode.Shared, false, 0);
 
                 AudioFileReader audioFileReader2 = new AudioFileReader(files[curDir][curFile]);
