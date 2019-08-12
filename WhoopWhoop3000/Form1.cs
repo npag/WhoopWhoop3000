@@ -29,8 +29,10 @@ namespace Soundboard
             Program.NewKey += new Program.KeyHandler(keyEvent);
             Rectangle workingArea = Screen.GetWorkingArea(this);
             this.Location = new Point(workingArea.Right - Size.Width, workingArea.Bottom - Size.Height);
-            device = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).FirstOrDefault(d => d.ID == "{0.0.0.00000000}.{a14f7b68-1bb8-4de3-bfd6-38fc5fc43b2d}");
-            device2 = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).FirstOrDefault(d => d.ID == "{0.0.0.00000000}.{4ac56367-03a9-474e-b1e3-c6dfb1f36aad}");//{0.0.0.00000000}.{234779d1-4c87-4bc3-88c9-e03ea41dfbd0}
+            device = new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).FirstOrDefault(d => d.DeviceFriendlyName == "VB-Audio VoiceMeeter VAIO");
+            device2 = new MMDeviceEnumerator().GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+
+            MessageBox.Show("Virtual device: " + (device == null ? "null" : device.DeviceFriendlyName) + "\n" + "Physical device: " + (device2 == null ? "null" : device2.DeviceFriendlyName), "Init WhoopWhoop");
 
             update();
             showFile();
@@ -57,7 +59,7 @@ namespace Soundboard
                 tmrHide.Enabled = true;
             }
 
-            if (aKey == "MediaNextTrack")
+            if (aKey == "MediaNextTrack" || aKey == "F5")
             {
                 tmrHide.Enabled = false;
                 this.Show();
@@ -66,7 +68,7 @@ namespace Soundboard
                 tmrHide.Enabled = true;
             }
 
-            if (aKey == "MediaPreviousTrack")
+            if (aKey == "MediaPreviousTrack" || aKey == "F6")
             {
                 tmrHide.Enabled = false;
                 this.Show();
@@ -115,22 +117,34 @@ namespace Soundboard
                     if (waveOut.PlaybackState == PlaybackState.Playing)
                     {
                         waveOut.Stop();
+                    }
+                }
+                if (waveOut2 != null)
+                {
+                    if (waveOut2.PlaybackState == PlaybackState.Playing)
+                    {
                         waveOut2.Stop();
                     }
                 }
-                waveOut = new WasapiOut(device, AudioClientShareMode.Shared, false, 0);
+                if (device != null)
+                {
+                    waveOut = new WasapiOut(device, AudioClientShareMode.Shared, false, 0);
 
-                AudioFileReader audioFileReader = new AudioFileReader(files[curDir][curFile]);
+                    AudioFileReader audioFileReader = new AudioFileReader(files[curDir][curFile]);
 
-                waveOut.Init(audioFileReader);
-                waveOut.Play();
+                    waveOut.Init(audioFileReader);
+                    waveOut.Play();
+                }
 
-                waveOut2 = new WasapiOut(device2, AudioClientShareMode.Shared, false, 0);
+                if (device2 != null)
+                {
+                    waveOut2 = new WasapiOut(device2, AudioClientShareMode.Shared, false, 0);
 
-                AudioFileReader audioFileReader2 = new AudioFileReader(files[curDir][curFile]);
-                audioFileReader2.Volume = 0.2F;
-                waveOut2.Init(audioFileReader2);
-                waveOut2.Play();
+                    AudioFileReader audioFileReader2 = new AudioFileReader(files[curDir][curFile]);
+                    audioFileReader2.Volume = 0.2F;
+                    waveOut2.Init(audioFileReader2);
+                    waveOut2.Play();
+                }
             }
             catch
             {
